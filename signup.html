@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Create an account — SkillNest</title>
+<link rel="icon" href="logo.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body class="auth" data-auth="guest">
+
+<main class="auth-card">
+  <h1>Create your account</h1>
+  <p class="lede">It takes a minute. Your courses start empty.</p>
+
+  <p class="form-note" id="note" role="alert"></p>
+
+  <form id="signupForm" novalidate>
+    <div class="field">
+      <label for="username">Full name</label>
+      <input id="username" name="username" type="text" autocomplete="name" required>
+      <p class="error" id="usernameError"></p>
+    </div>
+
+    <div class="field">
+      <label for="email">Email</label>
+      <input id="email" name="email" type="email" autocomplete="email" required>
+      <p class="error" id="emailError"></p>
+    </div>
+
+    <div class="field">
+      <label for="password">Password</label>
+      <input id="password" name="password" type="password" autocomplete="new-password" required>
+      <p class="error" id="passwordError"></p>
+    </div>
+
+    <div class="field">
+      <label for="confirm">Confirm password</label>
+      <input id="confirm" name="confirm" type="password" autocomplete="new-password" required>
+      <p class="error" id="confirmError"></p>
+    </div>
+
+    <button class="btn btn-primary btn-block" type="submit">Create account</button>
+  </form>
+
+  <p class="auth-alt">Already have an account? <a href="login.html">Log in</a></p>
+  <a class="auth-back" href="index.html">Back to home</a>
+</main>
+
+<script src="app.js"></script>
+<script>
+  var form = document.getElementById("signupForm");
+  var note = document.getElementById("note");
+  var EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
+  function setError(id, message) {
+    var input = document.getElementById(id);
+    var box = document.getElementById(id + "Error");
+    box.textContent = message || "";
+    box.classList.toggle("show", !!message);
+    input.setAttribute("aria-invalid", message ? "true" : "false");
+    return !message;
+  }
+
+  form.addEventListener("submit", function (e) {
+    e.preventDefault();
+    note.classList.remove("show", "ok");
+
+    var name = document.getElementById("username").value.trim();
+    var email = document.getElementById("email").value.trim();
+    var password = document.getElementById("password").value;
+    var confirm = document.getElementById("confirm").value;
+
+    var ok = setError("username", name.length >= 2 ? "" : "Use at least 2 characters.");
+    ok = setError("email", EMAIL.test(email) ? "" : "Enter an email like you@example.com.") && ok;
+    ok = setError("password", password.length >= 6 ? "" : "Use at least 6 characters.") && ok;
+    ok = setError("confirm", confirm === password && confirm ? "" : "Both passwords need to match.") && ok;
+    if (!ok) return;
+
+    SkillNest.store.signUp(name, email, password);
+    note.textContent = "Account created. Taking you to your dashboard…";
+    note.classList.add("show", "ok");
+    setTimeout(function () { location.href = "dashboard.html"; }, 700);
+  });
+</script>
+</body>
+</html>

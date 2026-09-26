@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SkillNest — learn a skill, keep the streak</title>
+<meta name="description" content="SkillNest is a small learning platform: pick a course, track your progress, and keep a daily streak.">
+<link rel="icon" href="logo.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body class="landing">
+<a class="skip-link" href="#hero">Skip to content</a>
+
+<div class="landing-bar">
+  <span class="landing-word">SKILL<span>NEST</span></span>
+  <a class="btn btn-primary" href="login.html">Log in</a>
+</div>
+
+<main class="hero" id="hero">
+  <div class="hero-copy">
+    <h1>Nurturing talent, attracting success.</h1>
+    <p class="lede">Pick a course, work through it a lesson at a time, and watch the progress bar move. SkillNest keeps your streak, your certificates, and your next lesson in one place.</p>
+    <div class="hero-actions">
+      <a class="btn btn-primary" href="signup.html">Create an account</a>
+      <a class="btn btn-ghost" href="login.html">I already have one</a>
+    </div>
+  </div>
+
+  <div class="hero-art">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="-160 -160 320 320" role="img" aria-label="The SkillNest mark: a woven nest holding connected skill nodes">
+      <defs>
+        <linearGradient id="nestGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#6366f1" />
+          <stop offset="50%" stop-color="#4f46e5" />
+          <stop offset="100%" stop-color="#3730a3" />
+        </linearGradient>
+        <linearGradient id="nodeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stop-color="#06b6d4" />
+          <stop offset="100%" stop-color="#3b82f6" />
+        </linearGradient>
+        <filter id="nestGlow" x="-30%" y="-30%" width="160%" height="160%">
+          <feGaussianBlur stdDeviation="6" result="blur" />
+          <feComposite in="SourceGraphic" in2="blur" operator="over" />
+        </filter>
+      </defs>
+      <circle cx="0" cy="0" r="150" fill="#4f46e5" opacity="0.16" filter="url(#nestGlow)" />
+      <path d="M -90,-20 C -120,40 -40,100 0,100 C 50,100 110,50 90,-10" fill="none" stroke="#312e81" stroke-width="6" stroke-linecap="round" opacity="0.7" />
+      <path d="M -100,0 C -110,-60 -30,-90 10,-90 C 60,-90 100,-40 95,20" fill="none" stroke="#312e81" stroke-width="4" stroke-linecap="round" opacity="0.5" />
+      <path d="M -120,-10 C -140,70 -50,120 0,120 C 60,120 130,80 120,-20 C 110,-100 30,-120 -20,-120 C -80,-120 -110,-70 -120,-10 Z" fill="none" stroke="url(#nestGrad)" stroke-width="12" stroke-linecap="round" stroke-dasharray="400 20 50 15 80 30" />
+      <path d="M -105,45 C -70,95 20,105 65,85" fill="none" stroke="#06b6d4" stroke-width="5" stroke-linecap="round" />
+      <path d="M 105,-25 C 115,35 60,95 -10,105" fill="none" stroke="#a855f7" stroke-width="4" stroke-linecap="round" />
+      <path d="M -60,-105 C 10,-115 80,-70 100,-15" fill="none" stroke="#3b82f6" stroke-width="5" stroke-linecap="round" />
+      <line x1="-35" y1="15" x2="35" y2="5" stroke="#ffffff" stroke-width="2" stroke-dasharray="4 4" opacity="0.6" />
+      <line x1="-35" y1="15" x2="10" y2="-55" stroke="#67e8f9" stroke-width="1.5" opacity="0.5" />
+      <line x1="35" y1="5" x2="10" y2="-55" stroke="#67e8f9" stroke-width="1.5" opacity="0.5" />
+      <circle cx="-35" cy="15" r="28" fill="url(#nodeGrad)" opacity="0.85" />
+      <circle cx="-35" cy="15" r="28" fill="none" stroke="#ffffff" stroke-width="1.5" opacity="0.5" />
+      <path d="M -45,15 L -38,22 L -25,9" fill="none" stroke="#ffffff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
+      <circle cx="35" cy="5" r="32" fill="url(#nodeGrad)" filter="url(#nestGlow)" />
+      <circle cx="35" cy="5" r="32" fill="none" stroke="#67e8f9" stroke-width="2" />
+      <path d="M 23,0 L 15,5 L 23,10 M 47,0 L 55,5 L 47,10 M 38,-3 L 32,13" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+      <circle cx="10" cy="-55" r="16" fill="#a855f7" />
+      <polygon points="10,-63 16,-55 10,-47 4,-55" fill="#ffffff" />
+      <circle cx="-130" cy="-40" r="4" fill="#06b6d4" />
+      <circle cx="140" cy="20" r="5" fill="#a855f7" />
+      <circle cx="70" cy="-110" r="3" fill="#3b82f6" />
+      <circle cx="-50" cy="120" r="4" fill="#6366f1" />
+    </svg>
+  </div>
+</main>
+
+<section class="hero-points" aria-label="What SkillNest does">
+  <div class="point">
+    <h3>Nine courses, one place</h3>
+    <p>Design, development, business, marketing and personal growth — filter the catalogue and add what you want to learn.</p>
+  </div>
+  <div class="point">
+    <h3>Progress you can see</h3>
+    <p>Every lesson you finish moves the bar, adds to your hours, and earns a certificate at 100%.</p>
+  </div>
+  <div class="point">
+    <h3>Set it up your way</h3>
+    <p>Name, photo, dark mode and email updates all live in Settings and follow you across the app.</p>
+  </div>
+</section>
+
+<script src="app.js"></script>
+</body>
+</html>

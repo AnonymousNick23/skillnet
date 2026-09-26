@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Explore courses — SkillNest</title>
+<link rel="icon" href="logo.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body data-auth="required">
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="topbar">
+  <button class="menu-btn" id="menuBtn" type="button" aria-expanded="false" aria-controls="sidebar">
+    <span aria-hidden="true">☰</span><span class="visually-hidden">Open navigation</span>
+  </button>
+  <a class="brand" href="dashboard.html"><span class="brand-mark" aria-hidden="true">✦</span> SkillNest</a>
+</header>
+
+<aside class="sidebar" id="sidebar">
+  <a class="brand" href="dashboard.html"><span class="brand-mark" aria-hidden="true">✦</span> SkillNest</a>
+  <nav class="side-nav" aria-label="Main">
+    <a href="dashboard.html"><span class="ico" aria-hidden="true">⌂</span> Dashboard</a>
+    <a href="explore.html" aria-current="page"><span class="ico" aria-hidden="true">⌕</span> Explore</a>
+    <a href="settings.html"><span class="ico" aria-hidden="true">⚙</span> Settings</a>
+  </nav>
+  <div class="side-foot">
+    <div class="side-user">
+      <span class="avatar" data-user="initials" aria-hidden="true">SN</span>
+      <div><strong data-user="name">Your name</strong><span data-user="email"></span></div>
+    </div>
+    <button class="btn btn-ghost btn-block" id="logout" type="button">Log out</button>
+  </div>
+</aside>
+<div class="scrim" id="scrim" aria-hidden="true"></div>
+
+<div class="shell">
+  <main class="page" id="main">
+    <div class="explore-head">
+      <div>
+        <h1>Explore new skills</h1>
+        <p class="subtitle">Nine courses across design, code, business and growth.</p>
+      </div>
+      <div class="search">
+        <span class="glass" aria-hidden="true">⌕</span>
+        <label class="visually-hidden" for="search">Search courses</label>
+        <input id="search" type="search" placeholder="Search courses">
+      </div>
+    </div>
+
+    <div class="filters" id="filters" role="group" aria-label="Filter by category">
+      <button class="chip" type="button" data-filter="all" aria-pressed="true">All courses</button>
+      <button class="chip" type="button" data-filter="design" aria-pressed="false">Design</button>
+      <button class="chip" type="button" data-filter="development" aria-pressed="false">Development</button>
+      <button class="chip" type="button" data-filter="business" aria-pressed="false">Business</button>
+      <button class="chip" type="button" data-filter="marketing" aria-pressed="false">Marketing</button>
+      <button class="chip" type="button" data-filter="growth" aria-pressed="false">Personal growth</button>
+    </div>
+
+    <div class="section-head">
+      <h2 id="resultTitle">All courses</h2>
+      <span class="muted small" id="resultCount" role="status" aria-live="polite"></span>
+    </div>
+
+    <section class="grid" id="grid" aria-labelledby="resultTitle"></section>
+  </main>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="app.js"></script>
+<script>
+  window.pageInit = function (user, store, catalog) {
+    var grid = document.getElementById("grid");
+    var countEl = document.getElementById("resultCount");
+    var titleEl = document.getElementById("resultTitle");
+    var searchEl = document.getElementById("search");
+    var filtersEl = document.getElementById("filters");
+
+    var state = { category: "all", query: "" };
+
+    function isEnrolled(id) {
+      return (user.enrolled || []).some(function (row) { return row.id === id; });
+    }
+
+    function matches(course) {
+      var inCategory = state.category === "all" || course.category === state.category;
+      var text = (course.title + " " + course.blurb + " " + course.level).toLowerCase();
+      return inCategory && text.indexOf(state.query) > -1;
+    }
+
+    function render() {
+      var results = catalog.filter(matches);
+
+      countEl.textContent = results.length + (results.length === 1 ? " course" : " courses");
+      var active = filtersEl.querySelector('[aria-pressed="true"]');
+      titleEl.textContent = state.query ? "Search results" : active.textContent;
+
+      if (!results.length) {
+        grid.innerHTML = '<div class="panel empty" style="grid-column:1/-1;padding:40px 22px">' +
+          '<p>Nothing matches that yet. Try another word or clear the filter.</p>' +
+          '<button class="btn btn-soft" type="button" id="resetFilters">Show all courses</button></div>';
+        return;
+      }
+
+      grid.innerHTML = results.map(function (course) {
+        var added = isEnrolled(course.id);
+        return '<article class="card course-card">' +
+          '<span class="tile ' + course.tone + '" aria-hidden="true">' + course.icon + '</span>' +
+          '<h3>' + course.title + '</h3>' +
+          '<p>' + course.blurb + '</p>' +
+          '<div class="meta"><span>' + course.hours.toFixed(1) + 'h · ' + course.lessons + ' lessons</span>' +
+          '<span class="level">' + course.level + '</span></div>' +
+          '<button class="btn ' + (added ? "btn-ghost" : "btn-primary") + '" type="button" ' +
+          'data-add="' + course.id + '"' + (added ? " disabled" : "") + '>' +
+          (added ? "In your learning" : "Add to my learning") + '</button>' +
+          '</article>';
+      }).join("");
+    }
+
+    grid.addEventListener("click", function (e) {
+      if (e.target.id === "resetFilters") {
+        state.category = "all";
+        state.query = "";
+        searchEl.value = "";
+        filtersEl.querySelectorAll(".chip").forEach(function (chip) {
+          chip.setAttribute("aria-pressed", String(chip.dataset.filter === "all"));
+        });
+        render();
+        return;
+      }
+
+      var button = e.target.closest("[data-add]");
+      if (!button) return;
+
+      var id = button.getAttribute("data-add");
+      var course = store.course(id);
+      user.enrolled = user.enrolled || [];
+      user.enrolled.push({ id: id, progress: 0 });
+      store.logActivity(user, "Started <strong>" + course.title + "</strong>", "amber");
+      store.save(user);
+
+      render();
+      window.toast("Added to your learning");
+    });
+
+    filtersEl.addEventListener("click", function (e) {
+      var chip = e.target.closest(".chip");
+      if (!chip) return;
+      filtersEl.querySelectorAll(".chip").forEach(function (other) {
+        other.setAttribute("aria-pressed", String(other === chip));
+      });
+      state.category = chip.dataset.filter;
+      render();
+    });
+
+    searchEl.addEventListener("input", function () {
+      state.query = searchEl.value.trim().toLowerCase();
+      render();
+    });
+
+    render();
+  };
+</script>
+</body>
+</html>

@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dashboard — SkillNest</title>
+<link rel="icon" href="logo.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body data-auth="required">
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="topbar">
+  <button class="menu-btn" id="menuBtn" type="button" aria-expanded="false" aria-controls="sidebar">
+    <span aria-hidden="true">☰</span><span class="visually-hidden">Open navigation</span>
+  </button>
+  <a class="brand" href="dashboard.html"><span class="brand-mark" aria-hidden="true">✦</span> SkillNest</a>
+</header>
+
+<aside class="sidebar" id="sidebar">
+  <a class="brand" href="dashboard.html"><span class="brand-mark" aria-hidden="true">✦</span> SkillNest</a>
+  <nav class="side-nav" aria-label="Main">
+    <a href="dashboard.html" aria-current="page"><span class="ico" aria-hidden="true">⌂</span> Dashboard</a>
+    <a href="explore.html"><span class="ico" aria-hidden="true">⌕</span> Explore</a>
+    <a href="settings.html"><span class="ico" aria-hidden="true">⚙</span> Settings</a>
+  </nav>
+  <div class="side-foot">
+    <div class="side-user">
+      <span class="avatar" data-user="initials" aria-hidden="true">SN</span>
+      <div><strong data-user="name">Your name</strong><span data-user="email"></span></div>
+    </div>
+    <button class="btn btn-ghost btn-block" id="logout" type="button">Log out</button>
+  </div>
+</aside>
+<div class="scrim" id="scrim" aria-hidden="true"></div>
+
+<div class="shell">
+  <main class="page" id="main">
+    <div class="page-head">
+      <div>
+        <h1 id="greeting">Welcome back</h1>
+        <p class="subtitle">Keep learning and reach your goals.</p>
+      </div>
+      <div class="page-user">
+        <span class="avatar" data-user="initials" aria-hidden="true">SN</span>
+        <span data-user="name">Your name</span>
+      </div>
+    </div>
+
+    <ul class="stats" id="stats" aria-label="Your learning stats"></ul>
+
+    <div class="columns">
+      <section class="panel" aria-labelledby="continueHeading">
+        <div class="panel-head">
+          <h2 id="continueHeading">Continue learning</h2>
+          <a class="small" href="explore.html">Browse courses</a>
+        </div>
+        <div class="panel-body" id="courseList"></div>
+      </section>
+
+      <section class="panel" aria-labelledby="activityHeading">
+        <div class="panel-head"><h2 id="activityHeading">Recent activity</h2></div>
+        <div class="panel-body" id="activityList"></div>
+      </section>
+    </div>
+  </main>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="app.js"></script>
+<script>
+  window.pageInit = function (user, store) {
+    var hour = new Date().getHours();
+    var partOfDay = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
+    document.getElementById("greeting").textContent =
+      partOfDay + ", " + (user.firstName || "there") + "!";
+
+    var statsEl = document.getElementById("stats");
+    var listEl = document.getElementById("courseList");
+    var feedEl = document.getElementById("activityList");
+
+    function enrolledCourses() {
+      return (user.enrolled || []).map(function (row) {
+        var course = store.course(row.id);
+        return course ? { course: course, progress: row.progress } : null;
+      }).filter(Boolean);
+    }
+
+    function renderStats() {
+      var rows = enrolledCourses();
+      var hours = rows.reduce(function (sum, row) {
+        return sum + row.course.hours * (row.progress / 100);
+      }, 0);
+      var certificates = rows.filter(function (row) { return row.progress >= 100; }).length;
+
+      var cards = [
+        { label: "Courses enrolled", value: rows.length, note: rows.length ? "Keep going" : "Add your first" },
+        { label: "Hours learned", value: hours.toFixed(1), note: "Across your courses" },
+        { label: "Day streak", value: user.streak || 1, note: "Come back tomorrow" },
+        { label: "Certificates", value: certificates, note: "Earned at 100%" }
+      ];
+
+      statsEl.innerHTML = cards.map(function (card) {
+        return '<li class="card stat"><span class="label">' + card.label + '</span>' +
+          '<span class="value">' + card.value + '</span>' +
+          '<span class="note">' + card.note + '</span></li>';
+      }).join("");
+    }
+
+    function renderCourses() {
+      var rows = enrolledCourses();
+      if (!rows.length) {
+        listEl.innerHTML = '<div class="empty"><p>You haven\'t added a course yet.</p>' +
+          '<a class="btn btn-primary" href="explore.html">Find a course</a></div>';
+        return;
+      }
+      listEl.innerHTML = rows.map(function (row) {
+        var done = row.progress >= 100;
+        return '<div class="course">' +
+          '<span class="tile ' + row.course.tone + '" aria-hidden="true">' + row.course.icon + '</span>' +
+          '<div class="course-info"><strong>' + row.course.title + '</strong>' +
+          '<div class="progress"><span style="width:' + row.progress + '%"></span></div></div>' +
+          '<span class="percent">' + row.progress + '%</span>' +
+          '<button class="btn btn-soft" type="button" data-continue="' + row.course.id + '"' +
+          (done ? " disabled" : "") + '>' + (done ? "Done" : "Continue") + '</button>' +
+          '</div>';
+      }).join("");
+    }
+
+    function renderActivity() {
+      var items = user.activity || [];
+      if (!items.length) {
+        feedEl.innerHTML = '<div class="empty"><p>Nothing here yet. Finish a lesson and it shows up.</p></div>';
+        return;
+      }
+      feedEl.innerHTML = items.map(function (item) {
+        return '<div class="activity"><span class="dot ' + (item.tone || "") + '"></span>' +
+          '<span>' + item.text + '<br><small class="muted">' + item.when + '</small></span></div>';
+      }).join("");
+    }
+
+    listEl.addEventListener("click", function (e) {
+      var button = e.target.closest("[data-continue]");
+      if (!button) return;
+
+      var id = button.getAttribute("data-continue");
+      var row = (user.enrolled || []).find(function (item) { return item.id === id; });
+      if (!row) return;
+
+      row.progress = Math.min(100, row.progress + 10);
+      var course = store.course(id);
+      store.logActivity(
+        user,
+        row.progress >= 100
+          ? "Finished <strong>" + course.title + "</strong>"
+          : "Worked on <strong>" + course.title + "</strong>",
+        row.progress >= 100 ? "blue" : ""
+      );
+      store.save(user);
+
+      renderStats();
+      renderCourses();
+      renderActivity();
+      window.toast(row.progress >= 100 ? "Course complete" : "Progress saved");
+    });
+
+    renderStats();
+    renderCourses();
+    renderActivity();
+  };
+</script>
+</body>
+</html>

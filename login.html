@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Log in — SkillNest</title>
+<link rel="icon" href="logo.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body class="auth" data-auth="guest">
+
+<main class="auth-card">
+  <h1>Welcome back</h1>
+  <p class="lede">Log in to pick up where you left off.</p>
+
+  <p class="form-note" id="note" role="alert"></p>
+
+  <form id="loginForm" novalidate>
+    <div class="field">
+      <label for="identifier">Username or email</label>
+      <input id="identifier" name="identifier" type="text" autocomplete="username" required>
+      <p class="error" id="identifierError"></p>
+    </div>
+
+    <div class="field">
+      <label for="password">Password</label>
+      <input id="password" name="password" type="password" autocomplete="current-password" required>
+      <p class="error" id="passwordError"></p>
+    </div>
+
+    <button class="btn btn-primary btn-block" type="submit">Log in</button>
+  </form>
+
+  <p class="auth-alt">No account yet? <a href="signup.html">Create one</a></p>
+  <a class="auth-back" href="index.html">Back to home</a>
+</main>
+
+<script src="app.js"></script>
+<script>
+  var form = document.getElementById("loginForm");
+  var note = document.getElementById("note");
+
+  function setError(id, message) {
+    var input = document.getElementById(id);
+    var box = document.getElementById(id + "Error");
+    box.textContent = message || "";
+    box.classList.toggle("show", !!message);
+    input.setAttribute("aria-invalid", message ? "true" : "false");
+    return !message;
+  }
+
+  form.addEventListener("submit", function (e) {
+    e.preventDefault();
+    note.classList.remove("show", "ok");
+
+    var identifier = document.getElementById("identifier").value.trim();
+    var password = document.getElementById("password").value;
+
+    var ok = setError("identifier", identifier ? "" : "Enter the username or email you signed up with.");
+    ok = setError("password", password ? "" : "Enter your password.") && ok;
+    if (!ok) return;
+
+    var result = SkillNest.store.logIn(identifier, password);
+    if (result === "no-account") {
+      note.textContent = "No account is saved on this device yet. Create one first.";
+      note.classList.add("show");
+      return;
+    }
+    if (result === "bad-credentials") {
+      note.textContent = "That username or password doesn't match the saved account.";
+      note.classList.add("show");
+      return;
+    }
+    location.href = "dashboard.html";
+  });
+</script>
+</body>
+</html>

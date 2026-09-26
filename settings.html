@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Settings — SkillNest</title>
+<link rel="icon" href="logo.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body data-auth="required">
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="topbar">
+  <button class="menu-btn" id="menuBtn" type="button" aria-expanded="false" aria-controls="sidebar">
+    <span aria-hidden="true">☰</span><span class="visually-hidden">Open navigation</span>
+  </button>
+  <a class="brand" href="dashboard.html"><span class="brand-mark" aria-hidden="true">✦</span> SkillNest</a>
+</header>
+
+<aside class="sidebar" id="sidebar">
+  <a class="brand" href="dashboard.html"><span class="brand-mark" aria-hidden="true">✦</span> SkillNest</a>
+  <nav class="side-nav" aria-label="Main">
+    <a href="dashboard.html"><span class="ico" aria-hidden="true">⌂</span> Dashboard</a>
+    <a href="explore.html"><span class="ico" aria-hidden="true">⌕</span> Explore</a>
+    <a href="settings.html" aria-current="page"><span class="ico" aria-hidden="true">⚙</span> Settings</a>
+  </nav>
+  <div class="side-foot">
+    <div class="side-user">
+      <span class="avatar" data-user="initials" aria-hidden="true">SN</span>
+      <div><strong data-user="name">Your name</strong><span data-user="email"></span></div>
+    </div>
+    <button class="btn btn-ghost btn-block" id="logout" type="button">Log out</button>
+  </div>
+</aside>
+<div class="scrim" id="scrim" aria-hidden="true"></div>
+
+<div class="shell">
+  <main class="page" id="main">
+    <div class="page-head">
+      <div>
+        <h1>Settings</h1>
+        <p class="subtitle">Manage your profile and how SkillNest behaves.</p>
+      </div>
+      <button class="btn btn-primary" id="save" type="button">Save changes</button>
+    </div>
+
+    <section class="card profile-card">
+      <span class="avatar lg" id="avatar" data-user="initials" aria-hidden="true">SN</span>
+      <div class="profile-info">
+        <h2 id="previewName" data-user="name">Your name</h2>
+        <p id="memberSince">Member since today</p>
+      </div>
+      <button class="btn btn-soft" id="uploadButton" type="button">Change photo</button>
+      <input id="photoInput" type="file" accept="image/*" hidden>
+    </section>
+
+    <section class="card section" aria-labelledby="profileHeading">
+      <div class="section-top">
+        <h2 id="profileHeading">Profile information</h2>
+        <p>Keep your personal details up to date.</p>
+      </div>
+      <div class="form-grid">
+        <div class="field">
+          <label for="firstName">First name</label>
+          <input id="firstName" type="text" autocomplete="given-name">
+        </div>
+        <div class="field">
+          <label for="lastName">Last name</label>
+          <input id="lastName" type="text" autocomplete="family-name">
+        </div>
+        <div class="field full">
+          <label for="email">Email address</label>
+          <input id="email" type="email" autocomplete="email">
+          <p class="error" id="emailError"></p>
+        </div>
+        <div class="field full">
+          <label for="bio">Short bio</label>
+          <input id="bio" type="text" maxlength="90">
+        </div>
+      </div>
+    </section>
+
+    <section class="card section" aria-labelledby="prefsHeading">
+      <div class="section-top">
+        <h2 id="prefsHeading">Preferences</h2>
+        <p>These apply across every page and are remembered on this device.</p>
+      </div>
+      <div class="prefs">
+        <div class="pref">
+          <div><strong>Dark mode</strong><span>Switch between light and dark appearance.</span></div>
+          <span class="switch">
+            <input id="darkMode" type="checkbox">
+            <span class="slider" aria-hidden="true"></span>
+            <label class="visually-hidden" for="darkMode">Dark mode</label>
+          </span>
+        </div>
+        <div class="pref">
+          <div><strong>Email updates</strong><span>Occasional notes about your courses and progress.</span></div>
+          <span class="switch">
+            <input id="emails" type="checkbox">
+            <span class="slider" aria-hidden="true"></span>
+            <label class="visually-hidden" for="emails">Email updates</label>
+          </span>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="app.js"></script>
+<script>
+  window.pageInit = function (user, store) {
+    var byId = function (id) { return document.getElementById(id); };
+    var EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
+    byId("firstName").value = user.firstName || "";
+    byId("lastName").value = user.lastName || "";
+    byId("email").value = user.email || "";
+    byId("bio").value = user.bio || "";
+    byId("darkMode").checked = !!user.darkMode;
+    byId("emails").checked = user.emails !== false;
+
+    if (user.joined) {
+      byId("memberSince").textContent = "Member since " + new Date(user.joined)
+        .toLocaleDateString(undefined, { month: "long", year: "numeric" });
+    }
+
+    function paintAvatar() {
+      var avatar = byId("avatar");
+      if (user.photo) {
+        avatar.innerHTML = '<img src="' + user.photo + '" alt="">';
+      } else {
+        avatar.textContent = store.initials(user);
+      }
+    }
+
+    function updatePreview() {
+      var name = (byId("firstName").value + " " + byId("lastName").value).trim();
+      byId("previewName").textContent = name || "Your name";
+      if (!user.photo) {
+        byId("avatar").textContent =
+          name.split(/\s+/).map(function (word) { return word[0] || ""; }).join("").slice(0, 2).toUpperCase() || "SN";
+      }
+    }
+
+    byId("firstName").addEventListener("input", updatePreview);
+    byId("lastName").addEventListener("input", updatePreview);
+
+    // Photo: stored as a data URL so it survives a page reload.
+    byId("uploadButton").addEventListener("click", function () { byId("photoInput").click(); });
+    byId("photoInput").addEventListener("change", function (e) {
+      var file = e.target.files[0];
+      if (!file) return;
+      if (file.size > 1024 * 1024) {
+        window.toast("Pick an image under 1 MB");
+        e.target.value = "";
+        return;
+      }
+      var reader = new FileReader();
+      reader.onload = function () {
+        user.photo = reader.result;
+        store.save(user);
+        paintAvatar();
+        document.querySelectorAll('.avatar[data-user="initials"]').forEach(function (el) {
+          el.innerHTML = '<img src="' + user.photo + '" alt="">';
+        });
+        window.toast("Photo updated");
+      };
+      reader.readAsDataURL(file);
+    });
+
+    // Dark mode applies immediately, then persists.
+    byId("darkMode").addEventListener("change", function (e) {
+      document.documentElement.classList.toggle("dark", e.target.checked);
+      user.darkMode = e.target.checked;
+      store.save(user);
+    });
+
+    byId("save").addEventListener("click", function () {
+      var email = byId("email").value.trim();
+      var errorBox = byId("emailError");
+      var valid = EMAIL.test(email);
+
+      errorBox.textContent = valid ? "" : "Enter an email like you@example.com.";
+      errorBox.classList.toggle("show", !valid);
+      byId("email").setAttribute("aria-invalid", valid ? "false" : "true");
+      if (!valid) { byId("email").focus(); return; }
+
+      user.firstName = byId("firstName").value.trim();
+      user.lastName = byId("lastName").value.trim();
+      user.email = email.toLowerCase();
+      user.bio = byId("bio").value.trim();
+      user.emails = byId("emails").checked;
+      user.darkMode = byId("darkMode").checked;
+      store.save(user);
+
+      document.querySelectorAll("[data-user]").forEach(function (el) {
+        if (el.dataset.user === "name") el.textContent = store.fullName(user);
+        if (el.dataset.user === "email") el.textContent = user.email;
+      });
+      paintAvatar();
+      window.toast("Changes saved");
+    });
+
+    paintAvatar();
+    updatePreview();
+  };
+</script>
+</body>
+</html>
